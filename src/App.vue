@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
+import spinner from './components/spinner.vue'
 
 type Product = {
   id: number
@@ -59,6 +60,7 @@ watch(
   <div class="w-full h-full flex flex-col gap-5 justify-center items-center">
     <h1 class="text-4xl font-bold">Gift Search Bar</h1>
     <input type="text" class="p-2 border-2 border-gray-dark" v-model="state.searchTerm" placeholder="Start typing..." />
+    <spinner v-show="state.loading" />
     <ul class="list-disc">
       <li v-for="product in state.products" :key="product.id">
         {{ product.title }}
