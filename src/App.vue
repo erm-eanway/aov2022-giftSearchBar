@@ -30,7 +30,6 @@ const debounce = (func: Function, timeout: number) => {
 }
 
 const fetchProducts = async (term: string) => {
-  console.log(term)
   const res = await fetch(`https://dummyjson.com/products/search?q=${term}`)
   const json = await res.json()
   return json.products as Product[]
