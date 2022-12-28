@@ -48,20 +48,6 @@ const findProducts = async term => {
 // need to wrap the watched function in debounce
 const findProductsDB = debounce(findProducts, 500)
 
-// intermediate updates outside of debounced function
-// so some actions occur as soon as typing begins / before typing is complete
-watch(
-  () => state.searchTerm,
-  newTerm => {
-    // reset the intermediate product array so old products don't appear
-    state.products = []
-    // no action for empty search
-    if (!newTerm) return
-    // set the loading state so the spinner appears
-    state.loading = true
-  }
-)
-
 // watch the search term for changes, when it does,
 // find the products for that new term
 // with a 300 ms debounce
@@ -69,11 +55,16 @@ watch(
   // need an empty function to watch a reactive property
   () => state.searchTerm,
   newTerm => {
+    // reset the intermediate product array so old products don't appear
+    state.products = []
+
     // no action for empty search
     if (!newTerm) {
       return
     }
 
+    // start loading spinner
+    state.loading = true
     findProductsDB(newTerm)
   }
 )
@@ -84,10 +75,9 @@ watch(
     <h1 class="text-4xl font-bold">Gift Search Bar</h1>
     <input type="text" class="p-2 border-2 border-gray-dark" v-model="state.searchTerm" placeholder="Start typing..." />
     <spinner v-show="state.loading" />
-    <ul class="list-disc">
-      <li v-for="product in state.products" :key="product.id">
-        {{ product.title }}
-      </li>
+    <p v-if="!state.loading & !state.products.length">No results found.</p>
+    <ul v-else class="list-disc">
+      <li v-for="product in state.products" :key="product.id">{{ product.title }} - ${{ product.price }}</li>
     </ul>
   </div>
 </template>
