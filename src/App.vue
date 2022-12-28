@@ -33,18 +33,34 @@ const fetchProducts = async (term: string) => {
 }
 
 const findProducts = async term => {
-  if (!term) {
-    state.products = []
-    return
-  }
-
-  state.loading = true
   state.products = await fetchProducts(term)
+
   state.loading = false
+
+  // alert needs to be inside debounced function
+  // otherwise it will appear before products are updated
+  // however, loading spinner still appears when alert is up
+  if (!state.products.length) {
+    alert('No products found. Please try another search term.')
+  }
 }
 
 // need to wrap the watched function in debounce
-const findProductsDB = debounce(findProducts, 300)
+const findProductsDB = debounce(findProducts, 500)
+
+// intermediate updates outside of debounced function
+// so some actions occur as soon as typing begins / before typing is complete
+watch(
+  () => state.searchTerm,
+  newTerm => {
+    // reset the intermediate product array so old products don't appear
+    state.products = []
+    // no action for empty search
+    if (!newTerm) return
+    // set the loading state so the spinner appears
+    state.loading = true
+  }
+)
 
 // watch the search term for changes, when it does,
 // find the products for that new term
@@ -52,7 +68,14 @@ const findProductsDB = debounce(findProducts, 300)
 watch(
   // need an empty function to watch a reactive property
   () => state.searchTerm,
-  newTerm => findProductsDB(newTerm)
+  newTerm => {
+    // no action for empty search
+    if (!newTerm) {
+      return
+    }
+
+    findProductsDB(newTerm)
+  }
 )
 </script>
 
